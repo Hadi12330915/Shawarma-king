@@ -7,6 +7,9 @@ import fries from "../assets/fries.png";
 import hommus from "../assets/hommus.png";
 import orangejuice from "../assets/Orange juice.png";
 
+// Render backend URL
+const BACKEND_URL = 'https://shawarma-king-backend.onrender.com';
+
 const images = {
   "MAIN COURSE": shawarma,
   "APPETIZERS": fries,
@@ -21,7 +24,7 @@ const Menu = ({ user }) => {
   const [editingItem, setEditingItem] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/menu")
+    fetch(`${BACKEND_URL}/api/menu`)
       .then((res) => res.json())
       .then((data) => {
         const grouped = {};
@@ -57,7 +60,7 @@ const Menu = ({ user }) => {
         default: return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/menu/${tableName}/${editingItem.id}`, {
+      const response = await fetch(`${BACKEND_URL}/api/menu/${tableName}/${editingItem.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -105,7 +108,7 @@ const Menu = ({ user }) => {
         default: return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/menu/${tableName}/${item.id}`, {
+      const response = await fetch(`${BACKEND_URL}/api/menu/${tableName}/${item.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
