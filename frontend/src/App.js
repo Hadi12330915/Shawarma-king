@@ -11,10 +11,14 @@ import Branches from './pages/Branches';
 import Hire from './pages/Hire';
 import Menu from './pages/Menu';
 
+// Render backend URL
+const BACKEND_URL = 'https://shawarma-king-backend.onrender.com';
+
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-// Check for existing token on app load
+  
+  // Check for existing token on app load
   useEffect(() => {
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
@@ -22,7 +26,7 @@ function App() {
     if (token && savedUser) {
       try {
         // Verify token with backend
-        fetch('http://localhost:5000/api/auth/verify', {
+        fetch(`${BACKEND_URL}/api/auth/verify`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
           .then(res => res.json())
@@ -48,14 +52,16 @@ function App() {
       setLoading(false);
     }
   }, []);
-// logout function
+
+  // logout function
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
     window.location.href = '/';
   };
- // Show loading screen while checking auth (it will usually show for less then 1 sec but there is a loading screen if you also checkk the app.css)
+
+  // Show loading screen while checking auth
   if (loading) {
     return (
       <div className="loading-screen">
@@ -85,7 +91,7 @@ function App() {
           } 
         />
         
-        {/* admin route - on;y for admins */}
+        {/* admin route - only for admins */}
         <Route 
           path="/admin" 
           element={
@@ -120,6 +126,7 @@ function LoginSignup({ setUser }) {
     });
     setError('');
   };
+
   // handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -145,7 +152,7 @@ function LoginSignup({ setUser }) {
         ? { email: formData.email, password: formData.password }
         : { username: formData.username, email: formData.email, password: formData.password };
 
-      const response = await fetch(`http://localhost:5000${endpoint}`, {
+      const response = await fetch(`${BACKEND_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -273,7 +280,7 @@ function AdminPanel({ user, logout }) { //admin dashboard
     const token = localStorage.getItem('token');
     
     if (token) {
-      fetch('http://localhost:5000/api/admin/stats', {
+      fetch(`${BACKEND_URL}/api/admin/stats`, {
         headers: { 'Authorization': `Bearer ${token}` } //auth header
       })
         .then(res => {
@@ -291,7 +298,7 @@ function AdminPanel({ user, logout }) { //admin dashboard
         })
         .catch(() => {
           // fallback to mock data
-          fetch('http://localhost:5000/api/messages')
+          fetch(`${BACKEND_URL}/api/messages`)
             .then(res => res.json())
             .then(messages => {
               setStats({
@@ -415,7 +422,7 @@ function AdminPanel({ user, logout }) { //admin dashboard
   );
 }
 
-// user dashboard- For regular users
+// user dashboard - For regular users
 function UserDashboard({ user, logout }) {
   return (
     <div className="user-dashboard">
