@@ -13,12 +13,13 @@ app.use(cors());
 app.use(express.json());
 
 // Railway Database Connection
+// Replace the database connection section with this:
 const db = mysql.createConnection({
-  host: "mysql.railway.internal",
-  user: "root",
-  password: "vSCBRzhzpxvFKtOaIoGxhthbaOOJzpsm",
-  database: "railway",
-  port: 3306
+  host: process.env.MYSQLHOST || "mysql.railway.internal",
+  user: process.env.MYSQLUSER || "root",
+  password: process.env.MYSQLPASSWORD || "vSCBRzhzpxvFKtOaIoGxhthbaOOJzpsm",
+  database: process.env.MYSQLDATABASE || "railway",
+  port: process.env.MYSQLPORT || 3306
 });
 
 db.connect((err) => {
