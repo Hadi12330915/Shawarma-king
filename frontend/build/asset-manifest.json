@@ -1,0 +1,30 @@
+{
+  "files": {
+    "main.css": "/static/css/main.c78a6596.css",
+    "main.js": "/static/js/main.50c73486.js",
+    "static/js/787.28cb0dcd.chunk.js": "/static/js/787.28cb0dcd.chunk.js",
+    "static/media/shawarma.png": "/static/media/shawarma.8501b51b03c75396480e.png",
+    "static/media/background.png": "/static/media/background.e5f4e586c89a7c688c01.png",
+    "static/media/Orange juice.png": "/static/media/Orange juice.7ec39949c66ae419a017.png",
+    "static/media/logo.png": "/static/media/logo.59ae9e00a6c00f76237e.png",
+    "static/media/hommus.png": "/static/media/hommus.4ddb5e01ba00b8a30d35.png",
+    "static/media/fries.png": "/static/media/fries.ecdd04fcefe25e340af4.png",
+    "static/media/saida.png": "/static/media/saida.a061461485dbcc58d819.png",
+    "static/media/Tripoli.png": "/static/media/Tripoli.660dc224b2d36ac4c067.png",
+    "static/media/beirut.png": "/static/media/beirut.e79799312232bb61dde2.png",
+    "static/media/contact.png": "/static/media/contact.17eda4dee61359f08588.png",
+    "static/media/tyre.png": "/static/media/tyre.79e286178c388db18f1a.png",
+    "static/media/zahle.png": "/static/media/zahle.03643ffcf0be796a74aa.png",
+    "static/media/backgeound2.jpg": "/static/media/backgeound2.3a384181c36ca863e495.jpg",
+    "static/media/Hire.jpg": "/static/media/Hire.3d1dbaade0110b542190.jpg",
+    "static/media/Family.jpg": "/static/media/Family.e4df9aada7f6adf6548b.jpg",
+    "index.html": "/index.html",
+    "main.c78a6596.css.map": "/static/css/main.c78a6596.css.map",
+    "main.50c73486.js.map": "/static/js/main.50c73486.js.map",
+    "787.28cb0dcd.chunk.js.map": "/static/js/787.28cb0dcd.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c78a6596.css",
+    "static/js/main.50c73486.js"
+  ]
+}

@@ -5,32 +5,36 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
-dotenv.config(); // env
+dotenv.config();
 
 const app = express();
+<<<<<<< HEAD:backend-local/server.js
+=======
+const port = process.env.PORT || 5000;
+
+>>>>>>> e44551898b6b91b478cc20fde361cef3b35c7e2b:backend/server.js
 app.use(cors());
 app.use(express.json());
 
-// MySQL connection
+// MySQL connection (Railway)
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
+  port: process.env.MYSQLPORT
 });
 
 db.connect((err) => {
   if (err) {
-    console.log("DB connection failed:", err);
+    console.log("Database connection failed:", err);
   } else {
-    console.log("MySQL Connected");
+    console.log("Connected to Railway MySQL database");
   }
 });
 
-// JWT Secret from .env
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this";
 
-// Middleware to verify token
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 
@@ -48,94 +52,91 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-
-app.get("/api/admin/stats", verifyToken, (req, res) => {// Admin stats endpoint
-  if (!req.isAdmin) {// check if user is admin
-    return res.status(403).json({ error: "Admin access required" });// Forbidden
+app.get("/api/admin/stats", verifyToken, (req, res) => {
+  if (!req.isAdmin) {
+    return res.status(403).json({ error: "Admin access required" });
   }
   
-  const queries = [ // queries to get counts
-    "SELECT COUNT(*) as count FROM messages", // total messages
-    "SELECT COUNT(*) as count FROM users", // total users
-    "SELECT (SELECT COUNT(*) FROM main) + (SELECT COUNT(*) FROM appetizers) + (SELECT COUNT(*) FROM sauces) + (SELECT COUNT(*) FROM beverages) as count" // total menu items
+  const queries = [
+    "SELECT COUNT(*) as count FROM messages",
+    "SELECT COUNT(*) as count FROM users",
+    "SELECT (SELECT COUNT(*) FROM main) + (SELECT COUNT(*) FROM appetizers) + (SELECT COUNT(*) FROM sauces) + (SELECT COUNT(*) FROM beverages) as count"
   ];
   
-  db.query(queries[0], (err, messageResult) => { // execute first query
-    if (err) return res.status(500).json({ error: "Database error" });  // internal server error
+  db.query(queries[0], (err, messageResult) => {
+    if (err) return res.status(500).json({ error: "Database error" });
     
-    db.query(queries[1], (err, userResult) => { // execute second query
-      if (err) return res.status(500).json({ error: "Database error" }); // internal server error
+    db.query(queries[1], (err, userResult) => {
+      if (err) return res.status(500).json({ error: "Database error" });
       
-      db.query(queries[2], (err, menuResult) => { // execute third query
-        if (err) return res.status(500).json({ error: "Database error" }); // internal server error
+      db.query(queries[2], (err, menuResult) => {
+        if (err) return res.status(500).json({ error: "Database error" });
         
-        res.json({ // send stats response
-          totalMessages: messageResult[0].count || 0, // total messages
-          totalUsers: userResult[0].count || 0, // total users
-          totalMenuItems: menuResult[0].count || 0, // total menu items
-          revenue: 0 // placeholder for revenue
+        res.json({
+          totalMessages: messageResult[0].count || 0,
+          totalUsers: userResult[0].count || 0,
+          totalMenuItems: menuResult[0].count || 0,
+          revenue: 0
         });
       });
     });
   });
 });
-//crud for menu items
-const menuTables = { //mapping of table names to categories
-  'main': 'MAIN COURSE', // main course table
-  'appetizers': 'APPETIZERS', // appetizers table
-  'sauces': 'SAUCES & DIPS', // sauces & dips table
-  'beverages': 'BEVERAGES' // beverages table
+
+const menuTables = {
+  'main': 'MAIN COURSE',
+  'appetizers': 'APPETIZERS',
+  'sauces': 'SAUCES & DIPS',
+  'beverages': 'BEVERAGES'
 };
-//crud starts here below:
-// Update menu item
+
 app.put("/api/menu/:table/:id", verifyToken, (req, res) => {
   if (!req.isAdmin) {
     return res.status(403).json({ error: "Admin access required" });
   }
   
-  const { table, id } = req.params; // get table and id from params
-  const { name, price } = req.body; // get name and price from body
+  const { table, id } = req.params;
+  const { name, price } = req.body;
   
   if (!menuTables[table]) {
-    return res.status(400).json({ error: "Invalid table name" }); // bad request
+    return res.status(400).json({ error: "Invalid table name" });
   }
   
   if (!name || !price) {
-    return res.status(400).json({ error: "Name and price are required" });// bad request
+    return res.status(400).json({ error: "Name and price are required" });
   }
   
-  const q = `UPDATE ${table} SET name = ?, price = ? WHERE id = ?`;// update query
-  db.query(q, [name, price, id], (err, result) => { // execute query
+  const q = `UPDATE ${table} SET name = ?, price = ? WHERE id = ?`;
+  db.query(q, [name, price, id], (err, result) => {
     if (err) {
       console.log(err);
-      return res.status(500).json({ error: "Failed to update item" }); // error
+      return res.status(500).json({ error: "Failed to update item" });
     }
     
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Item not found" });// error item not found
+      return res.status(404).json({ error: "Item not found" });
     }
     
     res.json({ 
-      success: true,  // success response
-      message: "Item updated", // success message
-      item: { id, name, price, category: menuTables[table] } // updated item details
+      success: true,
+      message: "Item updated",
+      item: { id, name, price, category: menuTables[table] }
     });
   });
 });
 
-// Delete menu item
 app.delete("/api/menu/:table/:id", verifyToken, (req, res) => {
   if (!req.isAdmin) {
     return res.status(403).json({ error: "Admin access required" });
   }
   
-  const { table, id } = req.params; // get table and id from params
+  const { table, id } = req.params;
   
   if (!menuTables[table]) {
-    return res.status(400).json({ error: "Invalid table name" }); 
+    return res.status(400).json({ error: "Invalid table name" });
   }
   
-  const q = `DELETE FROM ${table} WHERE id = ?`; // delete query
+  const q = `DELETE FROM ${table} WHERE id = ?`;
   db.query(q, [id], (err, result) => {
     if (err) {
       console.log(err);
@@ -146,12 +147,11 @@ app.delete("/api/menu/:table/:id", verifyToken, (req, res) => {
       return res.status(404).json({ error: "Item not found" });
     }
     
-    res.json({ success: true, message: "Item deleted" }); // success response
+    res.json({ success: true, message: "Item deleted" });
   });
 });
 
-// Add new menu item
-app.post("/api/menu/:table", verifyToken, (req, res) => { // add new item
+app.post("/api/menu/:table", verifyToken, (req, res) => {
   if (!req.isAdmin) {
     return res.status(403).json({ error: "Admin access required" });
   }
@@ -167,7 +167,7 @@ app.post("/api/menu/:table", verifyToken, (req, res) => { // add new item
     return res.status(400).json({ error: "Name and price are required" });
   }
   
-  const q = `INSERT INTO ${table} (name, price) VALUES (?, ?)`; // insert query to add
+  const q = `INSERT INTO ${table} (name, price) VALUES (?, ?)`;
   db.query(q, [name, price], (err, result) => {
     if (err) {
       console.log(err);
@@ -177,13 +177,13 @@ app.post("/api/menu/:table", verifyToken, (req, res) => { // add new item
     res.status(201).json({ 
       success: true, 
       message: "Item added",
-      item: { id: result.insertId, name, price, category: menuTables[table] } // new item details
+      item: { id: result.insertId, name, price, category: menuTables[table] }
     });
   });
 });
-// 1. get the messages
-app.get("/api/messages", (req, res) => { 
-  const q = "SELECT * FROM messages ORDER BY created_at DESC"; // query to get messages
+
+app.get("/api/messages", (req, res) => {
+  const q = "SELECT * FROM messages ORDER BY created_at DESC";
   
   db.query(q, (err, data) => {
     if (err) {
@@ -194,17 +194,15 @@ app.get("/api/messages", (req, res) => {
   });
 });
 
-// 2. create a new message
 app.post("/api/messages", (req, res) => {
-  const { name, email, message } = req.body; // get data from request body
+  const { name, email, message } = req.body;
   
-  // Validate required fields
   if (!name || !email || !message) {
     return res.status(400).json({ error: "All fields are required" });
   }
   
-  const q = "INSERT INTO messages (name, email, message) VALUES (?, ?, ?)"; // insert query
-  const values = [name, email, message]; // values to insert
+  const q = "INSERT INTO messages (name, email, message) VALUES (?, ?, ?)";
+  const values = [name, email, message];
   
   db.query(q, values, (err, result) => {
     if (err) {
@@ -212,27 +210,25 @@ app.post("/api/messages", (req, res) => {
       return res.status(500).json({ error: "Failed to save message" });
     }
     
-    // Get the newly created message with ID
     const newMessage = {
       id: result.insertId,
       name,
       email,
       message,
-      created_at: new Date() // current timestamp
+      created_at: new Date()
     };
     
-    return res.status(201).json(newMessage); // return the new message
+    return res.status(201).json(newMessage);
   });
 });
 
-// 3.  delete message (only for admins)
-app.delete("/api/messages/:id", verifyToken, (req, res) => { // verifyToken middleware to check admin
+app.delete("/api/messages/:id", verifyToken, (req, res) => {
   if (!req.isAdmin) {
     return res.status(403).json({ error: "Admin access required" });
   }
   
   const messageId = req.params.id;
-  const q = "DELETE FROM messages WHERE id = ?"; // delete query
+  const q = "DELETE FROM messages WHERE id = ?";
   
   db.query(q, [messageId], (err, result) => {
     if (err) {
@@ -248,20 +244,19 @@ app.delete("/api/messages/:id", verifyToken, (req, res) => { // verifyToken midd
   });
 });
 
-// 4. edit/update message (only for admins)
 app.put("/api/messages/:id", verifyToken, (req, res) => {
   if (!req.isAdmin) {
     return res.status(403).json({ error: "Admin access required" });
   }
   
-  const messageId = req.params.id; // get message ID from params
-  const { message } = req.body; // get updated message content
+  const messageId = req.params.id;
+  const { message } = req.body;
   
   if (!message) {
     return res.status(400).json({ error: "Message content is required" });
   }
   
-  const q = "UPDATE messages SET message = ? WHERE id = ?"; // update query
+  const q = "UPDATE messages SET message = ? WHERE id = ?";
   
   db.query(q, [message, messageId], (err, result) => {
     if (err) {
@@ -276,9 +271,8 @@ app.put("/api/messages/:id", verifyToken, (req, res) => {
     return res.json({ success: true, message: "Message updated" });
   });
 });
-// menu read
+
 app.get("/api/menu", (req, res) => {
-  // Query to fetch all menu items from different tables
   const q = `
     SELECT id, name, price, 'MAIN COURSE' AS category FROM main
     UNION ALL
@@ -298,11 +292,9 @@ app.get("/api/menu", (req, res) => {
   });
 });
 
-// 1. registration for user (sign up)
 app.post("/api/auth/signup", async (req, res) => {
-  const { username, email, password } = req.body; // get data from request body
+  const { username, email, password } = req.body;
   
-  // Validate required fields
   if (!username || !email || !password) {
     return res.status(400).json({ error: "All fields are required" });
   }
@@ -312,8 +304,7 @@ app.post("/api/auth/signup", async (req, res) => {
   }
   
   try {
-    // Check if user exists
-    const checkQuery = "SELECT * FROM users WHERE email = ? OR username = ?"; // check existing user
+    const checkQuery = "SELECT * FROM users WHERE email = ? OR username = ?";
     db.query(checkQuery, [email, username], async (err, results) => {
       if (err) {
         console.log(err);
@@ -324,22 +315,19 @@ app.post("/api/auth/signup", async (req, res) => {
         return res.status(400).json({ error: "User already exists" });
       }
       
-      // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10); // hash password with salt rounds 10. salt rounds are used to increase security. 10 is a good balance between security and performance since higher salt rounds increase security but also increase computation time.
+      const hashedPassword = await bcrypt.hash(password, 10);
       
-      // Insert new user
-      const insertQuery = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"; // insert new user query
+      const insertQuery = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
       db.query(insertQuery, [username, email, hashedPassword], (err, result) => {
         if (err) {
           console.log(err);
           return res.status(500).json({ error: "Failed to create user" });
         }
         
-        // Create token
         const token = jwt.sign(
-          { userId: result.insertId, username, isAdmin: false }, //this will create a token with userId, username and isAdmin false for users
-          JWT_SECRET, // secret key
-          { expiresIn: '24h' } // token expiry time
+          { userId: result.insertId, username, isAdmin: false },
+          JWT_SECRET,
+          { expiresIn: '24h' }
         );
         
         res.status(201).json({
@@ -355,7 +343,6 @@ app.post("/api/auth/signup", async (req, res) => {
   }
 });
 
-// 2. user login
 app.post("/api/auth/login", (req, res) => {
   const { email, password } = req.body;
   
@@ -363,7 +350,7 @@ app.post("/api/auth/login", (req, res) => {
     return res.status(400).json({ error: "Email and password required" });
   }
   
-  const q = "SELECT * FROM users WHERE email = ?"; // query to get user by email
+  const q = "SELECT * FROM users WHERE email = ?";
   db.query(q, [email], async (err, results) => {
     if (err) {
       console.log(err);
@@ -376,15 +363,13 @@ app.post("/api/auth/login", (req, res) => {
     
     const user = results[0];
     
-    // Compare passwords
-    const validPassword = await bcrypt.compare(password, user.password); // compare hashed password to check if it matches
-    if (!validPassword) { //if it doesntmatch
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
     
-    // Create token
     const token = jwt.sign(
-      { userId: user.id, username: user.username, isAdmin: user.is_admin }, 
+      { userId: user.id, username: user.username, isAdmin: user.is_admin },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -392,7 +377,7 @@ app.post("/api/auth/login", (req, res) => {
     res.json({
       message: "Login successful",
       token,
-      user: { // return user details
+      user: {
         id: user.id,
         username: user.username,
         email: user.email,
@@ -402,9 +387,8 @@ app.post("/api/auth/login", (req, res) => {
   });
 });
 
-// 3. verify the token so that user doesnt have to login again and again
 app.get("/api/auth/verify", verifyToken, (req, res) => {
-  const q = "SELECT id, username, email, is_admin FROM users WHERE id = ?"; // query to get user by id
+  const q = "SELECT id, username, email, is_admin FROM users WHERE id = ?";
   db.query(q, [req.userId], (err, results) => {
     if (err) {
       return res.status(500).json({ error: "Database error" });
@@ -426,8 +410,6 @@ app.get("/api/auth/verify", verifyToken, (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
+app.listen(port, () => {
+  console.log(`Backend server running on port ${port}`);
 });
