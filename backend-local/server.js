@@ -8,11 +8,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-<<<<<<< HEAD:backend-local/server.js
-=======
+HEAD:backend-local/server.js
+
 const port = process.env.PORT || 5000;
 
->>>>>>> e44551898b6b91b478cc20fde361cef3b35c7e2b:backend/server.js
+e44551898b6b91b478cc20fde361cef3b35c7e2b:backend/server.js
 app.use(cors());
 app.use(express.json());
 
